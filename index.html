@@ -827,14 +827,14 @@ document.getElementById('swap-modal').addEventListener('click', function(e) {
 }
 
 const COINS = [
-  { id: 'bitcoin',     ticker: 'BTC',  name: 'Bitcoin',    type: 'Crypto',     cls: 'btc',  kraken: 'XBTUSD'  },
-  { id: 'ethereum',    ticker: 'ETH',  name: 'Ethereum',   type: 'Crypto',     cls: 'eth',  kraken: 'ETHUSD'  },
-  { id: 'tether',      ticker: 'USDT', name: 'Tether USD', type: 'Stablecoin', cls: 'usdt', kraken: null      },
-  { id: 'solana',      ticker: 'SOL',  name: 'Solana',     type: 'Crypto',     cls: 'sol',  kraken: 'SOLUSD'  },
-  { id: 'binancecoin', ticker: 'BNB',  name: 'BNB',        type: 'Crypto',     cls: 'bnb',  kraken: 'BNBUSD'  },
-  { id: 'cardano',     ticker: 'ADA',  name: 'Cardano',    type: 'Crypto',     cls: 'ada',  kraken: 'ADAUSD'  },
-  { id: 'polkadot',    ticker: 'DOT',  name: 'Polkadot',   type: 'Crypto',     cls: 'dot',  kraken: 'DOTUSD'  },
-  { id: 'avalanche',   ticker: 'AVAX', name: 'Avalanche',  type: 'Crypto',     cls: 'avax', kraken: 'AVAXUSD' },
+  { id: 'bitcoin',     ticker: 'BTC',  name: 'Bitcoin',    type: 'Crypto',     cls: 'btc',  kraken: 'XBTUSD',  krakenKey: 'XXBTZUSD'  },
+  { id: 'ethereum',    ticker: 'ETH',  name: 'Ethereum',   type: 'Crypto',     cls: 'eth',  kraken: 'ETHUSD',  krakenKey: 'XETHZUSD'  },
+  { id: 'tether',      ticker: 'USDT', name: 'Tether USD', type: 'Stablecoin', cls: 'usdt', kraken: null,      krakenKey: null        },
+  { id: 'solana',      ticker: 'SOL',  name: 'Solana',     type: 'Crypto',     cls: 'sol',  kraken: 'SOLUSD',  krakenKey: 'SOLUSD'    },
+  { id: 'binancecoin', ticker: 'BNB',  name: 'BNB',        type: 'Crypto',     cls: 'bnb',  kraken: 'BNBUSD',  krakenKey: 'BNBUSD'    },
+  { id: 'cardano',     ticker: 'ADA',  name: 'Cardano',    type: 'Crypto',     cls: 'ada',  kraken: 'ADAUSD',  krakenKey: 'ADAUSD'    },
+  { id: 'polkadot',    ticker: 'DOT',  name: 'Polkadot',   type: 'Crypto',     cls: 'dot',  kraken: 'DOTUSD',  krakenKey: 'DOTUSD'    },
+  { id: 'avalanche',   ticker: 'AVAX', name: 'Avalanche',  type: 'Crypto',     cls: 'avax', kraken: 'AVAXUSD', krakenKey: 'AVAXUSD'   },
 ];
 
 function fmt(price) {
@@ -882,8 +882,8 @@ async function fetchPrices() {
         data[coin.id] = { usd: 1.00, usd_24h_change: 0.01 };
         return;
       }
-      const key = Object.keys(json.result).find(k => k.includes(coin.ticker) || k === coin.kraken);
-      if (!key) return;
+      const key = coin.krakenKey || Object.keys(json.result).find(k => k.includes(coin.ticker));
+      if (!key || !json.result[key]) return;
       const t = json.result[key];
       const price = parseFloat(t.c[0]);
       const open  = parseFloat(t.o);
