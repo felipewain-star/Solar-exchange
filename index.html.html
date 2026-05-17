@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar Exchange — Compra y custodia cripto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #F5A623;
+    --gold-dim: #C8831A;
+    --gold-glow: rgba(245,166,35,0.18);
+    --bg: #0A0A0B;
+    --bg2: #111114;
+    --bg3: #16161A;
+    --border: rgba(255,255,255,0.07);
+    --border-gold: rgba(245,166,35,0.3);
+    --text: #F0EEE8;
+    --muted: #888884;
+    --font-head: 'Syne', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-head);
+    overflow-x: hidden;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 5%;
+    background: rgba(10,10,11,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em;
+  }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #000; font-weight: 800;
+  }
+  .logo span { color: var(--gold); }
+  nav ul { list-style: none; display: flex; gap: 2rem; }
+  nav ul li a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  nav ul li a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--gold); color: #000 !important;
+    padding: 0.55rem 1.3rem; border-radius: 100px;
+    font-weight: 700 !important; font-size: 0.85rem !important;
+    transition: opacity 0.2s !important;
+  }
+  .nav-cta:hover { opacity: 0.88; }
+
+  /* ─── HERO ─── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 8rem 5% 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; top: 20%; left: 50%;
+    transform: translateX(-50%);
+    width: 700px; height: 400px;
+    background: radial-gradient(ellipse, rgba(245,166,35,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg3); border: 1px solid var(--border-gold);
+    color: var(--gold); font-size: 0.78rem; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 0.45rem 1rem; border-radius: 100px;
+    margin-bottom: 2rem;
+    font-family: var(--font-mono);
+  }
+  .hero-tag::before {
+    content: ''; width: 6px; height: 6px;
+    background: var(--gold); border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  h1 {
+    font-size: clamp(2.8rem, 7vw, 6rem);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -0.04em;
+    max-width: 900px; margin-bottom: 1.5rem;
+  }
+  h1 em {
+    color: var(--gold); font-style: normal;
+    display: block;
+  }
+  .hero-sub {
+    color: var(--muted); font-size: 1.1rem;
+    max-width: 520px; line-height: 1.7;
+    margin-bottom: 3rem;
+    font-weight: 400;
+  }
+  .hero-btns {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn-primary {
+    background: var(--gold); color: #000;
+    padding: 0.9rem 2.2rem; border-radius: 100px;
+    font-weight: 700; font-size: 0.95rem; font-family: var(--font-head);
+    border: none; cursor: pointer; text-decoration: none;
+    transition: transform 0.15s, opacity 0.15s;
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-2px); opacity: 0.9; }
+  .btn-outline {
+    background: transparent; color: var(--text);
+    padding: 0.9rem 2.2rem; border-radius: 100px;
+    font-weight: 600; font-size: 0.95rem; font-family: var(--font-head);
+    border: 1px solid var(--border); cursor: pointer; text-decoration: none;
+    transition: border-color 0.2s, transform 0.15s;
+    display: inline-block;
+  }
+  .btn-outline:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+  /* Stats bar */
+  .stats-bar {
+    margin-top: 5rem;
+    display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+    border-top: 1px solid var(--border);
+    padding-top: 3rem;
+    width: 100%; max-width: 800px;
+  }
+  .stat-item { text-align: center; }
+  .stat-num {
+    font-size: 2rem; font-weight: 800; color: var(--text);
+    letter-spacing: -0.03em;
+    font-family: var(--font-mono);
+  }
+  .stat-num span { color: var(--gold); }
+  .stat-label {
+    font-size: 0.8rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-weight: 500; margin-top: 4px;
+  }
+
+  /* ─── SECTIONS SHARED ─── */
+  section { padding: 7rem 5%; }
+  .section-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem; color: var(--gold);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-tag::before {
+    content: ''; display: block;
+    width: 24px; height: 1px; background: var(--gold);
+  }
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.1; margin-bottom: 1.2rem;
+  }
+  .section-sub {
+    color: var(--muted); font-size: 1rem;
+    max-width: 520px; line-height: 1.7;
+  }
+
+  /* ─── CÓMO FUNCIONA ─── */
+  #como-funciona { background: var(--bg2); }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+  .step-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .step-card:hover { border-color: var(--border-gold); }
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem; color: var(--gold);
+    letter-spacing: 0.1em; margin-bottom: 1.2rem;
+    opacity: 0.8;
+  }
+  .step-icon {
+    width: 44px; height: 44px;
+    background: var(--gold-glow);
+    border: 1px solid var(--border-gold);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-bottom: 1.2rem;
+  }
+  .step-card h3 {
+    font-size: 1.05rem; font-weight: 700;
+    margin-bottom: 0.6rem; letter-spacing: -0.01em;
+  }
+  .step-card p {
+    font-size: 0.88rem; color: var(--muted); line-height: 1.65;
+    font-weight: 400;
+  }
+
+  /* ─── CRIPTOS ─── */
+  #criptos { background: var(--bg); }
+  .crypto-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-end; flex-wrap: wrap; gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  .crypto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .crypto-card {
+    background: var(--bg2);
+    padding: 1.4rem 1.6rem;
+    display: flex; align-items: center; gap: 1rem;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+  .crypto-card:hover { background: var(--bg3); }
+  .crypto-logo {
+    width: 42px; height: 42px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.85rem; font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+  .crypto-info { flex: 1; min-width: 0; }
+  .crypto-name { font-size: 0.95rem; font-weight: 700; }
+  .crypto-ticker {
+    font-size: 0.75rem; color: var(--muted);
+    font-family: var(--font-mono); margin-top: 2px;
+  }
+  .crypto-price { text-align: right; }
+  .crypto-price .price {
+    font-size: 0.95rem; font-weight: 700;
+    font-family: var(--font-mono);
+  }
+  .crypto-change {
+    font-size: 0.75rem; font-family: var(--font-mono);
+    margin-top: 2px; font-weight: 500;
+  }
+  .up { color: #22c55e; }
+  .down { color: #ef4444; }
+
+  .btc { background: rgba(247,147,26,0.15); color: #F7931A; }
+  .eth { background: rgba(98,126,234,0.15); color: #627EEA; }
+  .usdt { background: rgba(38,161,123,0.15); color: #26A17B; }
+  .sol { background: rgba(153,69,255,0.15); color: #9945FF; }
+  .bnb { background: rgba(243,186,47,0.15); color: #F3BA2F; }
+  .ada { background: rgba(0,51,173,0.15); color: #0033AD; }
+  .dot { background: rgba(230,0,122,0.15); color: #E6007A; }
+  .avax { background: rgba(232,65,66,0.15); color: #E84142; }
+
+  .more-tag {
+    text-align: center; margin-top: 2rem;
+    color: var(--muted); font-size: 0.88rem;
+    font-family: var(--font-mono);
+  }
+  .more-tag a { color: var(--gold); text-decoration: none; }
+
+  /* ─── TARIFAS ─── */
+  #tarifas { background: var(--bg2); }
+  .fees-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 4rem;
+  }
+  @media (max-width: 700px) { .fees-layout { grid-template-columns: 1fr; } }
+  .fee-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .fee-card.featured {
+    border-color: var(--border-gold);
+    background: linear-gradient(135deg, rgba(245,166,35,0.06) 0%, var(--bg3) 60%);
+  }
+  .fee-badge {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    background: var(--gold); color: #000;
+    font-size: 0.7rem; font-weight: 800;
+    padding: 0.25rem 0.7rem; border-radius: 100px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+  }
+  .fee-name {
+    font-size: 0.75rem; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    font-family: var(--font-mono); margin-bottom: 0.8rem;
+  }
+  .fee-pct {
+    font-size: 3.5rem; font-weight: 800;
+    letter-spacing: -0.05em; line-height: 1;
+    font-family: var(--font-mono);
+    margin-bottom: 0.3rem;
+  }
+  .fee-pct span { color: var(--gold); }
+  .fee-desc {
+    font-size: 0.85rem; color: var(--muted);
+    line-height: 1.6; margin-bottom: 2rem;
+  }
+  .fee-features { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .fee-features li {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.88rem; color: var(--text);
+  }
+  .fee-features li::before {
+    content: '✓';
+    color: var(--gold); font-weight: 700;
+    font-size: 0.85rem; flex-shrink: 0;
+  }
+
+  /* ─── FAQ ─── */
+  #faq { background: var(--bg); }
+  .faq-layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 5rem;
+    align-items: start;
+    margin-top: 4rem;
+  }
+  @media (max-width: 800px) { .faq-layout { grid-template-columns: 1fr; gap: 2rem; } }
+  .faq-sticky { position: sticky; top: 7rem; }
+  .faq-list { display: flex; flex-direction: column; gap: 0; }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .faq-q {
+    width: 100%; background: none; border: none;
+    color: var(--text); font-family: var(--font-head);
+    font-size: 0.98rem; font-weight: 600;
+    text-align: left; cursor: pointer;
+    padding: 1.5rem 0;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 1rem;
+    transition: color 0.2s;
+  }
+  .faq-q:hover { color: var(--gold); }
+  .faq-arrow {
+    font-size: 1.2rem; transition: transform 0.3s;
+    flex-shrink: 0; color: var(--muted);
+  }
+  .faq-item.open .faq-arrow { transform: rotate(45deg); color: var(--gold); }
+  .faq-a {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+  .faq-a-inner {
+    padding-bottom: 1.5rem;
+    color: var(--muted); font-size: 0.9rem; line-height: 1.75;
+    font-weight: 400;
+  }
+  .faq-item.open .faq-a { max-height: 300px; }
+
+  /* ─── REGISTRO ─── */
+  #registro { background: var(--bg2); }
+  .registro-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 5rem; align-items: center;
+  }
+  @media (max-width: 800px) {
+    .registro-inner { grid-template-columns: 1fr; gap: 3rem; }
+  }
+  .form-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2.5rem;
+  }
+  .form-title {
+    font-size: 1.2rem; font-weight: 800;
+    margin-bottom: 0.5rem; letter-spacing: -0.02em;
+  }
+  .form-sub {
+    font-size: 0.85rem; color: var(--muted);
+    margin-bottom: 2rem; line-height: 1.6;
+  }
+  .form-group { margin-bottom: 1.2rem; }
+  .form-group label {
+    display: block; font-size: 0.8rem;
+    font-weight: 600; color: var(--muted);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-mono);
+  }
+  .form-group input {
+    width: 100%;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text);
+    font-family: var(--font-head); font-size: 0.95rem;
+    padding: 0.85rem 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus { border-color: var(--border-gold); }
+  .form-group input::placeholder { color: var(--muted); }
+  .form-submit {
+    width: 100%; background: var(--gold); color: #000;
+    border: none; border-radius: 100px;
+    font-family: var(--font-head); font-size: 1rem; font-weight: 700;
+    padding: 1rem; cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+  }
+  .form-submit:hover { opacity: 0.88; transform: translateY(-1px); }
+  .form-terms {
+    text-align: center; font-size: 0.75rem; color: var(--muted);
+    margin-top: 1rem; line-height: 1.6;
+  }
+  .form-terms a { color: var(--gold); text-decoration: none; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 3rem 5% 2rem;
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 1rem;
+  }
+  footer .logo { font-size: 1rem; }
+  footer p {
+    font-size: 0.8rem; color: var(--muted);
+    font-family: var(--font-mono);
+  }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a {
+    font-size: 0.8rem; color: var(--muted);
+    text-decoration: none; transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up { animation: fadeUp 0.7s ease both; }
+  .delay-1 { animation-delay: 0.15s; }
+  .delay-2 { animation-delay: 0.3s; }
+  .delay-3 { animation-delay: 0.45s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">☀</div>
+    Solar <span>Exchange</span>
+  </div>
+  <ul>
+    <li><a href="#como-funciona">Cómo funciona</a></li>
+    <li><a href="#criptos">Criptos</a></li>
+    <li><a href="#tarifas">Tarifas</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#registro" class="nav-cta">Crear cuenta</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-tag">Powered by ChangeNOW · Custodia segura</div>
+  <h1 class="fade-up">
+    Tu portafolio cripto,<br>
+    <em>sin complicaciones.</em>
+  </h1>
+  <p class="hero-sub fade-up delay-1">
+    Compra, intercambia y almacena criptomonedas con seguridad de nivel institucional. Sin intermediarios innecesarios, sin tecnicismos.
+  </p>
+  <div class="hero-btns fade-up delay-2">
+    <button onclick="openSwap()" class="btn-primary">Intercambiar ahora ⚡</button>
+    <a href="#como-funciona" class="btn-outline">Ver cómo funciona</a>
+  </div>
+  <div class="stats-bar fade-up delay-3">
+    <div class="stat-item">
+      <div class="stat-num">1<span>,</span>500<span>+</span></div>
+      <div class="stat-label">Criptomonedas</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">2<span> min</span></div>
+      <div class="stat-label">Tiempo de swap</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">99<span>.</span>9<span>%</span></div>
+      <div class="stat-label">Uptime garantizado</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0<span>.</span>4<span>%</span></div>
+      <div class="stat-label">Comisión mínima</div>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section id="como-funciona">
+  <div class="section-tag">Proceso</div>
+  <h2>Simple desde el primer paso</h2>
+  <p class="section-sub">Diseñado para que cualquier persona pueda empezar a invertir en cripto en minutos.</p>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01 / REGISTRO</div>
+      <div class="step-icon">👤</div>
+      <h3>Crea tu cuenta</h3>
+      <p>Regístrate con tu email en menos de 2 minutos. Verificación rápida y sin papeleo excesivo.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02 / DEPÓSITO</div>
+      <div class="step-icon">💳</div>
+      <h3>Deposita fondos</h3>
+      <p>Usa tarjeta de crédito, débito o transferencia bancaria. Aceptamos más de 60 monedas fiat.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03 / COMPRA</div>
+      <div class="step-icon">⚡</div>
+      <h3>Compra cripto</h3>
+      <p>Elige entre más de 1,500 criptomonedas. Precio en tiempo real, sin sorpresas en el monto final.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04 / CUSTODIA</div>
+      <div class="step-icon">🔐</div>
+      <h3>Almacenamos por ti</h3>
+      <p>Tus activos quedan seguros en infraestructura de grado institucional. Acceso 24/7 desde tu dashboard.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CRIPTOS DISPONIBLES -->
+<section id="criptos">
+  <div class="crypto-header">
+    <div>
+      <div class="section-tag">Mercado</div>
+      <h2>Criptos disponibles</h2>
+      <p class="section-sub">Principales activos del mercado con precios en tiempo real.</p>
+    </div>
+  </div>
+  <div class="crypto-grid" id="crypto-grid">
+    <div class="crypto-card" style="grid-column:1/-1;justify-content:center;padding:2.5rem;color:var(--muted);font-family:var(--font-mono);font-size:0.85rem;gap:0.7rem;flex-direction:column;align-items:center">
+      <div class="price-loader"></div>
+      Cargando precios en tiempo real...
+    </div>
+  </div>
+  <p class="more-tag" id="market-footer" style="opacity:0">+ 1,492 activos más disponibles · <a href="#registro">Ver todos →</a></p>
+</section>
+
+<!-- TARIFAS -->
+<section id="tarifas">
+  <div class="section-tag">Precios</div>
+  <h2>Tarifas claras, sin letra chica</h2>
+  <p class="section-sub">Comisiones competitivas con total transparencia. Lo que ves es lo que pagas.</p>
+  <div class="fees-layout">
+    <div class="fee-card">
+      <div class="fee-name">Plan básico</div>
+      <div class="fee-pct">0.4<span>%</span></div>
+      <p class="fee-desc">Por cada intercambio o compra realizada. Sin costo de apertura de cuenta ni mensualidad.</p>
+      <ul class="fee-features">
+        <li>Sin monto mínimo (desde $2 USD)</li>
+        <li>1,500+ criptomonedas</li>
+        <li>Tasas flotantes (mejor precio del mercado)</li>
+        <li>Swap completado en ~2 minutos</li>
+        <li>Dashboard de portfolio incluido</li>
+      </ul>
+    </div>
+    <div class="fee-card featured">
+      <div class="fee-badge">Recomendado</div>
+      <div class="fee-name">Plan custodia</div>
+      <div class="fee-pct">0.4<span>%</span></div>
+      <p class="fee-desc">Todo lo del plan básico más almacenamiento institucional de tus activos bajo nuestra plataforma.</p>
+      <ul class="fee-features">
+        <li>Custodia institucional vía NOW Custody</li>
+        <li>Tasas fijas disponibles (precio garantizado)</li>
+        <li>Conversiones off-chain sin red fee</li>
+        <li>Staking disponible en activos seleccionados</li>
+        <li>Soporte prioritario 24/7</li>
+        <li>Sin límite de transacciones</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="faq-layout">
+    <div class="faq-sticky">
+      <div class="section-tag">FAQ</div>
+      <h2>Preguntas frecuentes</h2>
+      <p class="section-sub">Todo lo que necesitas saber antes de empezar.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Es seguro dejar mis criptos en Solar Exchange?
+          <span class="faq-arrow">+</span>
+        </button>
+        <div class="faq-a">
+          <p class="faq-a-inner">Sí. Utilizamos la infraestructura de custodia de NOW Custody (parte del ecosistema ChangeNOW), que opera con almacenamiento frío y caliente de nivel institucional. Tus activos nunca se mezclan con los de otros usuarios y tienes acceso a tu saldo en todo momento.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Necesito pasar por KYC para operar?
+          <span class="faq-arrow">+</span>
+        </button>
+        <div class="faq-a">
+          <p class="faq-a-inner">Para intercambios pequeños de cripto a cripto, no se requiere verificación de identidad. Sin embargo, para compras con tarjeta o volúmenes más altos, aplicamos un proceso de verificación estándar (KYC) que toma unos pocos minutos.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Con qué métodos de pago puedo comprar cripto?
+          <span class="faq-arrow">+</span>
+        </button>
+        <div class="faq-a">
+          <p class="faq-a-inner">Aceptamos Visa, Mastercard, Apple Pay, Google Pay y transferencias bancarias. También puedes depositar desde otra wallet enviando cripto directamente a tu dirección en Solar Exchange.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Cuánto tarda un intercambio?
+          <span class="faq-arrow">+</span>
+        </button>
+        <div class="faq-a">
+          <p class="faq-a-inner">El tiempo promedio es de 2 minutos, con una tasa de éxito del 99.97%. En casos de alta congestión de red, puede extenderse un poco más, pero siempre recibirás notificaciones en tiempo real sobre el estado de tu transacción.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿Puedo retirar mis cripto a una wallet externa?
+          <span class="faq-arrow">+</span>
+        </button>
+        <div class="faq-a">
+          <p class="faq-a-inner">Absolutamente. Solar Exchange no bloquea tus fondos. Puedes retirar a cualquier wallet externa (MetaMask, Ledger, Trezor, etc.) en cualquier momento. Solo aplica la tarifa de red (gas fee) correspondiente a la blockchain.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          ¿En qué países está disponible?
+          <span class="faq-arrow">+</span>
+        </button>
+        <div class="faq-a">
+          <p class="faq-a-inner">Solar Exchange está disponible en la mayoría de países de Latinoamérica y a nivel global. Algunas funciones como compra con tarjeta pueden variar según la jurisdicción. Consulta la disponibilidad completa al registrarte.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRO -->
+<section id="registro">
+  <div class="registro-inner">
+    <div>
+      <div class="section-tag">Empezar</div>
+      <h2>Únete a Solar Exchange hoy</h2>
+      <p class="section-sub" style="margin-bottom:2rem">Crear una cuenta es gratis y toma menos de 2 minutos. Sin tarjeta de crédito necesaria para empezar.</p>
+      <div style="display:flex;flex-direction:column;gap:1rem">
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--muted)">
+          <span style="color:var(--gold);font-weight:700">✓</span> Sin costos de apertura
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--muted)">
+          <span style="color:var(--gold);font-weight:700">✓</span> Dashboard con tu portafolio en tiempo real
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--muted)">
+          <span style="color:var(--gold);font-weight:700">✓</span> Soporte en español 24/7
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.9rem;color:var(--muted)">
+          <span style="color:var(--gold);font-weight:700">✓</span> Empieza desde $2 USD
+        </div>
+      </div>
+    </div>
+    <div class="form-card">
+      <div class="form-title">Crear cuenta gratuita</div>
+      <div class="form-sub">Accede a todos los mercados cripto en segundos.</div>
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" placeholder="Ej: María González">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="tu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" placeholder="Mínimo 8 caracteres">
+      </div>
+      <button class="form-submit">Crear mi cuenta →</button>
+      <p class="form-terms">
+        Al registrarte aceptas nuestros <a href="#">Términos de uso</a> y <a href="#">Política de privacidad</a>. Solar Exchange utiliza cifrado de extremo a extremo.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SWAP MODAL -->
+<div id="swap-modal" style="
+  display:none; position:fixed; inset:0; z-index:999;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; padding:1rem;
+">
+  <div style="
+    background:var(--bg3); border:1px solid var(--border-gold);
+    border-radius:24px; width:100%; max-width:480px;
+    overflow:hidden; position:relative;
+  ">
+    <!-- Header -->
+    <div style="
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.2rem 1.5rem; border-bottom:1px solid var(--border);
+    ">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="logo-icon" style="width:26px;height:26px;font-size:11px">☀</div>
+        <span style="font-weight:800;font-size:1rem;letter-spacing:-0.02em">Solar <span style="color:var(--gold)">Exchange</span></span>
+      </div>
+      <button onclick="closeSwap()" style="
+        background:none; border:none; color:var(--muted);
+        font-size:1.5rem; cursor:pointer; line-height:1;
+        transition:color 0.2s;
+      " onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">×</button>
+    </div>
+    <!-- ChangeNOW Widget -->
+    <div style="padding:0">
+      <iframe
+        id="swap-iframe"
+        src="https://changenow.io/embeds/exchange-widget/v2/widget.html?FAQ=false&amount=0.1&amountFiat=1500&backgroundColor=16161A&darkMode=true&from=btc&fromFiat=usd&horizontal=false&isFiat=false&lang=es&link_id=3f001e8b7d5bf9&logo=false&primaryColor=F5A623&to=eth&toFiat=btc&toTheMoon=true"
+        style="height:420px; width:100%; border:none; display:block;"
+        allow="clipboard-write"
+        loading="lazy"
+      ></iframe>
+    </div>
+    <!-- Footer note -->
+    <div style="
+      padding:1rem 1.5rem; border-top:1px solid var(--border);
+      font-size:0.75rem; color:var(--muted); text-align:center;
+      font-family:var(--font-mono); line-height:1.5;
+    ">
+      Powered by ChangeNOW · Transacciones en ~2 min · No custodial
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">
+    <div class="logo-icon">☀</div>
+    Solar <span>Exchange</span>
+  </div>
+  <div class="footer-links">
+    <a href="#">Términos</a>
+    <a href="#">Privacidad</a>
+    <a href="#">Soporte</a>
+    <a href="#">API</a>
+  </div>
+  <p>© 2026 Solar Exchange · Powered by ChangeNOW</p>
+</footer>
+
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+.price-loader {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--border-gold);
+  border-top-color: var(--gold);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes flashGold {
+  0% { color: var(--gold); }
+  100% { color: var(--text); }
+}
+.price-updated { animation: flashGold 1s ease; }
+</style>
+<script>
+function openSwap() {
+  const modal = document.getElementById('swap-modal');
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeSwap() {
+  const modal = document.getElementById('swap-modal');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.getElementById('swap-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSwap();
+});
+
+
+  const item = btn.parentElement;
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+const COINS = [
+  { id: 'bitcoin',     ticker: 'BTC',  name: 'Bitcoin',    type: 'Crypto',     cls: 'btc',  binance: 'BTC'  },
+  { id: 'ethereum',    ticker: 'ETH',  name: 'Ethereum',   type: 'Crypto',     cls: 'eth',  binance: 'ETH'  },
+  { id: 'tether',      ticker: 'USDT', name: 'Tether USD', type: 'Stablecoin', cls: 'usdt', binance: null   },
+  { id: 'solana',      ticker: 'SOL',  name: 'Solana',     type: 'Crypto',     cls: 'sol',  binance: 'SOL'  },
+  { id: 'binancecoin', ticker: 'BNB',  name: 'BNB',        type: 'Crypto',     cls: 'bnb',  binance: 'BNB'  },
+  { id: 'cardano',     ticker: 'ADA',  name: 'Cardano',    type: 'Crypto',     cls: 'ada',  binance: 'ADA'  },
+  { id: 'polkadot',    ticker: 'DOT',  name: 'Polkadot',   type: 'Crypto',     cls: 'dot',  binance: 'DOT'  },
+  { id: 'avalanche-2', ticker: 'AVAX', name: 'Avalanche',  type: 'Crypto',     cls: 'avax', binance: 'AVAX' },
+];
+
+function fmt(price) {
+  if (price >= 1000) return '$' + price.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (price >= 1)    return '$' + price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return '$' + price.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 4 });
+}
+
+function renderGrid(data) {
+  const grid = document.getElementById('crypto-grid');
+  const ids = COINS.map(c => c.id);
+  grid.innerHTML = COINS.map(coin => {
+    const d = data[coin.id];
+    if (!d) return '';
+    const price = d.usd;
+    const change = d.usd_24h_change;
+    const isUp = change >= 0;
+    return `
+    <div class="crypto-card">
+      <div class="crypto-logo ${coin.cls}">${coin.ticker}</div>
+      <div class="crypto-info">
+        <div class="crypto-name">${coin.name}</div>
+        <div class="crypto-ticker">${coin.ticker} · ${coin.type}</div>
+      </div>
+      <div class="crypto-price">
+        <div class="price price-updated">${fmt(price)}</div>
+        <div class="crypto-change ${isUp ? 'up' : 'down'}">${isUp ? '▲' : '▼'} ${Math.abs(change).toFixed(2)}%</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('market-footer').style.opacity = '1';
+}
+
+async function fetchPrices() {
+  const symbols = COINS.filter(c => c.binance).map(c => `"${c.binance}USDT"`).join(',');
+  try {
+    const [tickerRes, prevRes] = await Promise.all([
+      fetch(`https://api.binance.com/api/v3/ticker/price?symbols=[${symbols}]`),
+      fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols}]`)
+    ]);
+    const prices = await tickerRes.json();
+    const stats  = await prevRes.json();
+
+    const priceMap = {};
+    prices.forEach(p => { priceMap[p.symbol] = parseFloat(p.price); });
+    const changeMap = {};
+    stats.forEach(s => { changeMap[s.symbol] = parseFloat(s.priceChangePercent); });
+
+    const data = {};
+    COINS.forEach(coin => {
+      if (coin.binance) {
+        data[coin.id] = {
+          usd: priceMap[coin.binance + 'USDT'] || 0,
+          usd_24h_change: changeMap[coin.binance + 'USDT'] || 0
+        };
+      } else {
+        data[coin.id] = { usd: 1.00, usd_24h_change: 0.01 };
+      }
+    });
+    renderGrid(data);
+  } catch(e) {
+    document.getElementById('crypto-grid').innerHTML = `
+      <div class="crypto-card" style="grid-column:1/-1;justify-content:center;padding:2rem;color:var(--muted);font-family:var(--font-mono);font-size:0.82rem;text-align:center">
+        No se pudieron cargar los precios. Intenta recargar la página.
+      </div>`;
+  }
+}
+
+fetchPrices();
+setInterval(fetchPrices, 30000);
+</script>
+</body>
+</html>
