@@ -11,9 +11,9 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --gold: #F5A623; --gold-dim: #C8831A; --gold-glow: rgba(245,166,35,0.18);
-    --bg: #0A0A0B; --bg2: #111114; --bg3: #16161A;
-    --border: rgba(255,255,255,0.07); --border-gold: rgba(245,166,35,0.3);
+    --gold: #39FF14; --gold-dim: #28CC0F; --gold-glow: rgba(57,255,20,0.12);
+    --bg: #080A08; --bg2: #0D150D; --bg3: #111A11;
+    --border: rgba(255,255,255,0.07); --border-gold: rgba(57,255,20,0.3);
     --text: #F0EEE8; --muted: #888884;
     --font-head: 'Syne', sans-serif; --font-mono: 'DM Mono', monospace;
   }
@@ -334,7 +334,7 @@
       </div>
       <button onclick="closeSwap()" style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer;line-height:1;">×</button>
     </div>
-    <iframe src="https://changenow.io/embeds/exchange-widget/v2/widget.html?FAQ=false&amount=0.1&amountFiat=1500&backgroundColor=16161A&darkMode=true&from=btc&fromFiat=usd&horizontal=false&isFiat=false&lang=es&link_id=3f001e8b7d5bf9&logo=false&primaryColor=F5A623&to=eth&toTheMoon=true" style="height:420px;width:100%;border:none;display:block;" allow="clipboard-write" loading="lazy"></iframe>
+    <iframe src="https://changenow.io/embeds/exchange-widget/v2/widget.html?FAQ=false&amount=0.1&amountFiat=1500&backgroundColor=111A11&darkMode=true&from=btc&fromFiat=usd&horizontal=false&isFiat=false&lang=es&link_id=3f001e8b7d5bf9&logo=false&primaryColor=39FF14&to=eth&toTheMoon=true" style="height:420px;width:100%;border:none;display:block;" allow="clipboard-write" loading="lazy"></iframe>
     <div style="padding:1rem 1.5rem;border-top:1px solid var(--border);font-size:0.75rem;color:var(--muted);text-align:center;font-family:var(--font-mono);">Powered by ChangeNOW · Transacciones en ~2 min · No custodial</div>
   </div>
 </div>
@@ -429,13 +429,13 @@ function toggleFaq(btn) {
   if (!isOpen) item.classList.add('open');
 }
 
-var countdown = 60;
+var countdown = 20;
 function updateCountdown() {
   var el = document.getElementById('price-countdown');
   if (el) el.textContent = 'Actualiza en ' + countdown + 's';
   countdown--;
   if (countdown < 0) {
-    countdown = 60;
+    countdown = 20;
     fetchPrices();
   }
 }
