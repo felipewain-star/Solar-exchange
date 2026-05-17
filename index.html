@@ -827,14 +827,14 @@ document.getElementById('swap-modal').addEventListener('click', function(e) {
 }
 
 const COINS = [
-  { id: 'bitcoin',     ticker: 'BTC',  name: 'Bitcoin',    type: 'Crypto',     cls: 'btc',  binance: 'BTC'  },
-  { id: 'ethereum',    ticker: 'ETH',  name: 'Ethereum',   type: 'Crypto',     cls: 'eth',  binance: 'ETH'  },
-  { id: 'tether',      ticker: 'USDT', name: 'Tether USD', type: 'Stablecoin', cls: 'usdt', binance: null   },
-  { id: 'solana',      ticker: 'SOL',  name: 'Solana',     type: 'Crypto',     cls: 'sol',  binance: 'SOL'  },
-  { id: 'binancecoin', ticker: 'BNB',  name: 'BNB',        type: 'Crypto',     cls: 'bnb',  binance: 'BNB'  },
-  { id: 'cardano',     ticker: 'ADA',  name: 'Cardano',    type: 'Crypto',     cls: 'ada',  binance: 'ADA'  },
-  { id: 'polkadot',    ticker: 'DOT',  name: 'Polkadot',   type: 'Crypto',     cls: 'dot',  binance: 'DOT'  },
-  { id: 'avalanche-2', ticker: 'AVAX', name: 'Avalanche',  type: 'Crypto',     cls: 'avax', binance: 'AVAX' },
+  { id: 'bitcoin',     ticker: 'BTC',  name: 'Bitcoin',    type: 'Crypto',     cls: 'btc',  kraken: 'XBTUSD'  },
+  { id: 'ethereum',    ticker: 'ETH',  name: 'Ethereum',   type: 'Crypto',     cls: 'eth',  kraken: 'ETHUSD'  },
+  { id: 'tether',      ticker: 'USDT', name: 'Tether USD', type: 'Stablecoin', cls: 'usdt', kraken: null      },
+  { id: 'solana',      ticker: 'SOL',  name: 'Solana',     type: 'Crypto',     cls: 'sol',  kraken: 'SOLUSD'  },
+  { id: 'binancecoin', ticker: 'BNB',  name: 'BNB',        type: 'Crypto',     cls: 'bnb',  kraken: 'BNBUSD'  },
+  { id: 'cardano',     ticker: 'ADA',  name: 'Cardano',    type: 'Crypto',     cls: 'ada',  kraken: 'ADAUSD'  },
+  { id: 'polkadot',    ticker: 'DOT',  name: 'Polkadot',   type: 'Crypto',     cls: 'dot',  kraken: 'DOTUSD'  },
+  { id: 'avalanche',   ticker: 'AVAX', name: 'Avalanche',  type: 'Crypto',     cls: 'avax', kraken: 'AVAXUSD' },
 ];
 
 function fmt(price) {
@@ -869,30 +869,26 @@ function renderGrid(data) {
 }
 
 async function fetchPrices() {
-  const symbols = COINS.filter(c => c.binance).map(c => `"${c.binance}USDT"`).join(',');
+  const pairs = COINS.filter(c => c.kraken).map(c => c.kraken).join(',');
   try {
-    const [tickerRes, prevRes] = await Promise.all([
-      fetch(`https://api.binance.com/api/v3/ticker/price?symbols=[${symbols}]`),
-      fetch(`https://api.binance.com/api/v3/ticker/24hr?symbols=[${symbols}]`)
-    ]);
-    const prices = await tickerRes.json();
-    const stats  = await prevRes.json();
-
-    const priceMap = {};
-    prices.forEach(p => { priceMap[p.symbol] = parseFloat(p.price); });
-    const changeMap = {};
-    stats.forEach(s => { changeMap[s.symbol] = parseFloat(s.priceChangePercent); });
+    const res = await fetch(`https://api.kraken.com/0/public/Ticker?pair=${pairs}`);
+    if (!res.ok) throw new Error('API error');
+    const json = await res.json();
+    if (json.error && json.error.length) throw new Error(json.error[0]);
 
     const data = {};
     COINS.forEach(coin => {
-      if (coin.binance) {
-        data[coin.id] = {
-          usd: priceMap[coin.binance + 'USDT'] || 0,
-          usd_24h_change: changeMap[coin.binance + 'USDT'] || 0
-        };
-      } else {
+      if (!coin.kraken) {
         data[coin.id] = { usd: 1.00, usd_24h_change: 0.01 };
+        return;
       }
+      const key = Object.keys(json.result).find(k => k.includes(coin.ticker) || k === coin.kraken);
+      if (!key) return;
+      const t = json.result[key];
+      const price = parseFloat(t.c[0]);
+      const open  = parseFloat(t.o);
+      const change = ((price - open) / open) * 100;
+      data[coin.id] = { usd: price, usd_24h_change: change };
     });
     renderGrid(data);
   } catch(e) {
